@@ -1,6 +1,6 @@
 
 -- ===============================================
--- Полная схема базы данных футбольной лиги с нуля
+-- Оптимизированная схема футбольной лиги (с нуля)
 -- ===============================================
 
 -- Очистка (только для dev окружений!)
@@ -92,13 +92,12 @@ CREATE TABLE match_participation (
     CONSTRAINT uq_match_player UNIQUE(match_id, player_id)
 );
 
--- Статистика игрока в конкретном матче
+-- Статистика игрока в конкретном матче (только Г, П, Ж, К)
 CREATE TABLE player_stats (
     id SERIAL PRIMARY KEY,
     match_participation_id INT NOT NULL REFERENCES match_participation(id),
     goals INT DEFAULT 0,
     assists INT DEFAULT 0,
-    penalties INT DEFAULT 0,
     yellow_cards INT DEFAULT 0,
     red_cards INT DEFAULT 0,
     CONSTRAINT uq_stats_participation UNIQUE(match_participation_id)
@@ -108,21 +107,17 @@ CREATE TABLE player_stats (
 -- Представления (Views)
 -- ===============================================
 
--- Суммарная статистика игрока по сезону и лиге
-CREATE OR REPLACE VIEW v_player_season_stats AS
+-- Суммарная статистика игрока за всё время
+CREATE OR REPLACE VIEW v_player_total_stats AS
 SELECT
     mp.player_id,
-    r.season_id,
-    r.league_id,
     SUM(ps.goals) AS total_goals,
     SUM(ps.assists) AS total_assists,
     SUM(ps.yellow_cards) AS total_yellow,
     SUM(ps.red_cards) AS total_red
 FROM player_stats ps
 JOIN match_participation mp ON mp.id = ps.match_participation_id
-JOIN matches m ON m.id = mp.match_id
-JOIN rounds r ON r.id = m.round_id
-GROUP BY mp.player_id, r.season_id, r.league_id;
+GROUP BY mp.player_id;
 
 -- ===============================================
 -- Индексы

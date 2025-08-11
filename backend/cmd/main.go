@@ -1,9 +1,9 @@
 package main
 
 import (
-	"football-league/config"
-	"football-league/internal/player"
-	"football-league/pkg/db"
+	"backend/config"
+	"backend/internal/player"
+	"backend/pkg/db"
 	"github.com/gin-contrib/cors"
 	"time"
 
