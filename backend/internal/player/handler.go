@@ -2,7 +2,7 @@ package player
 
 import (
 	"net/http"
-	"net/url"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,18 +18,21 @@ func NewHandler(u Usecase) *Handler {
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/players/search", h.searchPlayers)
 	r.GET("/players", h.getAllPlayers)
-	r.GET("/players/:name", h.getPlayerCard)
+	r.GET("/players/:id", h.getPlayerCard)
 }
 
 func (h *Handler) getPlayerCard(c *gin.Context) {
-	encodedName := c.Param("name")
-	name, err := url.QueryUnescape(encodedName)
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid player name"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid player id"})
 		return
 	}
 
-	playerCard, err := h.uc.GetPlayerCardByName(name)
+	seasonID, _ := strconv.Atoi(c.DefaultQuery("season_id", "0"))
+	leagueID, _ := strconv.Atoi(c.DefaultQuery("league_id", "0"))
+
+	playerCard, err := h.uc.GetPlayerCardByID(id, seasonID, leagueID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "player not found"})
 		return
