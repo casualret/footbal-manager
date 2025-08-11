@@ -29,10 +29,7 @@ func (h *Handler) getPlayerCard(c *gin.Context) {
 		return
 	}
 
-	seasonID, _ := strconv.Atoi(c.DefaultQuery("season_id", "0"))
-	leagueID, _ := strconv.Atoi(c.DefaultQuery("league_id", "0"))
-
-	playerCard, err := h.uc.GetPlayerCardByID(id, seasonID, leagueID)
+	playerCard, err := h.uc.GetPlayerCardByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "player not found"})
 		return
