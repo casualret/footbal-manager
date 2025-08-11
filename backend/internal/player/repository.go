@@ -7,6 +7,7 @@ import (
 type Repository interface {
 	GetPlayerCardByName(name string) (*PlayerCard, error)
 	GetAllPlayers() ([]PlayerShort, error)
+	SearchPlayers(name string) ([]PlayerShort, error)
 }
 
 type repository struct {
@@ -75,6 +76,37 @@ func (r *repository) GetAllPlayers() ([]PlayerShort, error) {
         JOIN teams t ON t.id = pth.team_id
     `
 	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []PlayerShort
+	for rows.Next() {
+		var p PlayerShort
+		if err := rows.Scan(&p.FullName, &p.Position, &p.Photo_URL, &p.Team); err != nil {
+			return nil, err
+		}
+		result = append(result, p)
+	}
+
+	return result, nil
+}
+
+func (r *repository) SearchPlayers(name string) ([]PlayerShort, error) {
+	query := `
+        SELECT
+            p.full_name,
+            p.position,
+            p.photo_url,
+            t.name AS team_name
+        FROM players p
+        JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
+        JOIN teams t ON t.id = pth.team_id
+        WHERE p.full_name ILIKE '%' || $1 || '%'
+    `
+
+	rows, err := r.db.Query(query, name)
 	if err != nil {
 		return nil, err
 	}
