@@ -16,8 +16,9 @@ func NewHandler(u Usecase) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
-	r.GET("/players/:name", h.getPlayerCard)
+	r.GET("/players/search", h.searchPlayers)
 	r.GET("/players", h.getAllPlayers)
+	r.GET("/players/:name", h.getPlayerCard)
 }
 
 func (h *Handler) getPlayerCard(c *gin.Context) {
@@ -42,5 +43,21 @@ func (h *Handler) getAllPlayers(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	c.JSON(http.StatusOK, players)
+}
+
+func (h *Handler) searchPlayers(c *gin.Context) {
+	name := c.Query("name")
+	if name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "name query parameter is required"})
+		return
+	}
+
+	players, err := h.uc.SearchPlayers(name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, players)
 }
