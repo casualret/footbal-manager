@@ -5,8 +5,8 @@ import (
 )
 
 type Repository interface {
-	GetPlayerCardByID(id, seasonID, leagueID int) (*PlayerCard, error)
-	GetPlayerCardByName(name string, seasonID, leagueID int) (*PlayerCard, error)
+	GetPlayerCardByID(id int) (*PlayerCard, error)
+	GetPlayerCardByName(name string) (*PlayerCard, error)
 	GetAllPlayers() ([]PlayerShort, error)
 	SearchPlayers(name string) ([]PlayerShort, error)
 }
@@ -20,9 +20,9 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 // ===== Карточка игрока по ID =====
-func (r *repository) GetPlayerCardByID(id, seasonID, leagueID int) (*PlayerCard, error) {
+func (r *repository) GetPlayerCardByID(id int) (*PlayerCard, error) {
 	query := `
-    SELECT 
+    SELECT
         p.id,
         p.full_name,
         p.position,
@@ -35,16 +35,13 @@ func (r *repository) GetPlayerCardByID(id, seasonID, leagueID int) (*PlayerCard,
     FROM players p
     JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
     JOIN teams t ON t.id = pth.team_id
-    LEFT JOIN v_player_season_stats v 
-           ON v.player_id = p.id
-           AND v.season_id = $2
-           AND v.league_id = $3
+    LEFT JOIN v_player_total_stats v ON v.player_id = p.id
     WHERE p.id = $1;
     `
 	var card PlayerCard
 	var stats Stats
 
-	err := r.db.QueryRow(query, id, seasonID, leagueID).Scan(
+	err := r.db.QueryRow(query, id).Scan(
 		&card.ID, &card.FullName, &card.Position, &card.Photo_URL, &card.Team,
 		&stats.Goals, &stats.Assists, &stats.YellowCards, &stats.RedCards,
 	)
@@ -57,9 +54,9 @@ func (r *repository) GetPlayerCardByID(id, seasonID, leagueID int) (*PlayerCard,
 }
 
 // ===== Карточка игрока по имени =====
-func (r *repository) GetPlayerCardByName(name string, seasonID, leagueID int) (*PlayerCard, error) {
+func (r *repository) GetPlayerCardByName(name string) (*PlayerCard, error) {
 	query := `
-    SELECT 
+    SELECT
         p.id,
         p.full_name,
         p.position,
@@ -72,16 +69,13 @@ func (r *repository) GetPlayerCardByName(name string, seasonID, leagueID int) (*
     FROM players p
     JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
     JOIN teams t ON t.id = pth.team_id
-    LEFT JOIN v_player_season_stats v 
-           ON v.player_id = p.id
-           AND v.season_id = $2
-           AND v.league_id = $3
+    LEFT JOIN v_player_total_stats v ON v.player_id = p.id
     WHERE p.full_name = $1;
     `
 	var card PlayerCard
 	var stats Stats
 
-	err := r.db.QueryRow(query, name, seasonID, leagueID).Scan(
+	err := r.db.QueryRow(query, name).Scan(
 		&card.ID, &card.FullName, &card.Position, &card.Photo_URL, &card.Team,
 		&stats.Goals, &stats.Assists, &stats.YellowCards, &stats.RedCards,
 	)
