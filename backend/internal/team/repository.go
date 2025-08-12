@@ -7,6 +7,7 @@ import (
 )
 
 type Repository interface {
+	GetTeams() ([]TeamCard, error)
 	GetTeamByID(id int) (*TeamCard, error)
 	GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error)
 }
@@ -17,6 +18,25 @@ type repository struct {
 
 func NewRepository(db *sql.DB) Repository {
 	return &repository{db: db}
+}
+
+func (r *repository) GetTeams() ([]TeamCard, error) {
+	query := `SELECT id, name, logo_url FROM teams;`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var teams []TeamCard
+	for rows.Next() {
+		var t TeamCard
+		if err := rows.Scan(&t.ID, &t.Name, &t.LogoURL); err != nil {
+			return nil, err
+		}
+		teams = append(teams, t)
+	}
+	return teams, nil
 }
 
 func (r *repository) GetTeamByID(id int) (*TeamCard, error) {

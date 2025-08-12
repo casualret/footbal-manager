@@ -1,10 +1,8 @@
 package team
 
-import "backend/internal/player"
-
 type Usecase interface {
 	GetTeamCardByID(id int) (*TeamCard, error)
-	GetTeamPlayers(id int) ([]player.PlayerShort, error)
+	GetTeams() ([]TeamCard, error)
 }
 
 type usecase struct {
@@ -16,9 +14,18 @@ func NewUsecase(r Repository) Usecase {
 }
 
 func (u *usecase) GetTeamCardByID(id int) (*TeamCard, error) {
-	return u.repo.GetTeamByID(id)
+	team, err := u.repo.GetTeamByID(id)
+	if err != nil {
+		return nil, err
+	}
+	players, err := u.repo.GetPlayersByTeamID(id)
+	if err != nil {
+		return nil, err
+	}
+	team.Players = players
+	return team, nil
 }
 
-func (u *usecase) GetTeamPlayers(id int) ([]player.PlayerShort, error) {
-	return u.repo.GetPlayersByTeamID(id)
+func (u *usecase) GetTeams() ([]TeamCard, error) {
+	return u.repo.GetTeams()
 }
