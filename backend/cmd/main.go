@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/config"
+	"backend/internal/league"
 	"backend/internal/player"
 	"backend/internal/team"
 	"backend/pkg/db"
@@ -24,6 +25,10 @@ func main() {
 	teamUsecase := team.NewUsecase(teamRepo)
 	teamHandler := team.NewHandler(teamUsecase)
 
+	leagueRepo := league.NewRepository(database)
+	leagueUsecase := league.NewUsecase(leagueRepo)
+	leagueHandler := league.NewHandler(leagueUsecase)
+
 	r := gin.Default()
 	r.Static("/static", "./static")
 
@@ -38,5 +43,6 @@ func main() {
 
 	playerHandler.RegisterRoutes(r)
 	teamHandler.RegisterRoutes(r)
+	leagueHandler.RegisterRoutes(r)
 	r.Run(":8080")
 }

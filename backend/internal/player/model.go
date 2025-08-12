@@ -23,3 +23,10 @@ type PlayerShort struct {
 	Photo_URL string `json:"photo_url"`
 	Team      string `json:"team"`
 }
+
+type NewPlayer struct {
+	FullName string `json:"full_name"`
+	Position string `json:"position"`
+	PhotoURL string `json:"photo_url"`
+	TeamID   int    `json:"team_id"`
+}

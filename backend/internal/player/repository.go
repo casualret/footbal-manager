@@ -3,6 +3,7 @@ package player
 import (
 	"database/sql"
 	"fmt"
+	"time"
 )
 
 type Repository interface {
@@ -10,6 +11,7 @@ type Repository interface {
 	GetPlayerCardByName(name string) (*PlayerCard, error)
 	GetAllPlayers() ([]PlayerShort, error)
 	SearchPlayers(name string, leagueID, teamID int) ([]PlayerShort, error)
+	CreatePlayer(p NewPlayer) (int, error)
 }
 
 type repository struct {
@@ -168,4 +170,35 @@ func (r *repository) SearchPlayers(name string, leagueID, teamID int) ([]PlayerS
 	}
 
 	return result, nil
+}
+
+func (r *repository) CreatePlayer(p NewPlayer) (int, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+
+	var id int
+	err = tx.QueryRow(
+		"INSERT INTO players (full_name, position, photo_url) VALUES ($1, $2, $3) RETURNING id",
+		p.FullName, p.Position, p.PhotoURL,
+	).Scan(&id)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	_, err = tx.Exec(
+		"INSERT INTO player_team_history (player_id, team_id, start_date) VALUES ($1, $2, $3)",
+		id, p.TeamID, time.Now(),
+	)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
 }

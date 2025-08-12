@@ -8,3 +8,8 @@ type TeamCard struct {
 	LogoURL string               `json:"logo_url"`
 	Players []player.PlayerShort `json:"players"`
 }
+
+type NewTeam struct {
+	Name    string `json:"name"`
+	LogoURL string `json:"logo_url"`
+}

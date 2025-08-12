@@ -5,6 +5,7 @@ type Usecase interface {
 	GetPlayerCardByName(name string) (*PlayerCard, error)
 	GetAllPlayers() ([]PlayerShort, error)
 	SearchPlayers(name string, leagueID, teamID int) ([]PlayerShort, error)
+	CreatePlayer(p NewPlayer) (int, error)
 }
 
 type usecase struct {
@@ -29,4 +30,8 @@ func (u *usecase) GetAllPlayers() ([]PlayerShort, error) {
 
 func (u *usecase) SearchPlayers(name string, leagueID, teamID int) ([]PlayerShort, error) {
 	return u.repo.SearchPlayers(name, leagueID, teamID)
+}
+
+func (u *usecase) CreatePlayer(p NewPlayer) (int, error) {
+	return u.repo.CreatePlayer(p)
 }

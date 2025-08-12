@@ -18,6 +18,7 @@ func NewHandler(u Usecase) *Handler {
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/players", h.getPlayers)
 	r.GET("/players/:id", h.getPlayerCard)
+	r.POST("/players", h.createPlayer)
 }
 
 func (h *Handler) getPlayerCard(c *gin.Context) {
@@ -34,6 +35,21 @@ func (h *Handler) getPlayerCard(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, playerCard)
+}
+
+func (h *Handler) createPlayer(c *gin.Context) {
+	var req NewPlayer
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	id, err := h.uc.CreatePlayer(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
 func (h *Handler) getPlayers(c *gin.Context) {

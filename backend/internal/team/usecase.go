@@ -3,6 +3,7 @@ package team
 type Usecase interface {
 	GetTeamCardByID(id int) (*TeamCard, error)
 	GetTeams() ([]TeamCard, error)
+	CreateTeam(t NewTeam) (int, error)
 }
 
 type usecase struct {
@@ -28,4 +29,8 @@ func (u *usecase) GetTeamCardByID(id int) (*TeamCard, error) {
 
 func (u *usecase) GetTeams() ([]TeamCard, error) {
 	return u.repo.GetTeams()
+}
+
+func (u *usecase) CreateTeam(t NewTeam) (int, error) {
+	return u.repo.CreateTeam(t)
 }
