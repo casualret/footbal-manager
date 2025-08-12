@@ -76,7 +76,7 @@ func (r *repository) GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error
 	}
 	defer rows.Close()
 
-	var result []player.PlayerShort
+	result := []player.PlayerShort{}
 	for rows.Next() {
 		var p player.PlayerShort
 		if err := rows.Scan(&p.ID, &p.FullName, &p.Position, &p.Photo_URL, &p.Team); err != nil {
