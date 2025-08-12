@@ -30,3 +30,8 @@ type NewPlayer struct {
 	PhotoURL string `json:"photo_url"`
 	TeamID   int    `json:"team_id"`
 }
+
+type PlayerTeam struct {
+	PlayerID int `json:"player_id"`
+	TeamID   int `json:"team_id"`
+}

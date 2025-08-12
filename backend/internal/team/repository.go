@@ -11,6 +11,7 @@ type Repository interface {
 	GetTeamByID(id int) (*TeamCard, error)
 	GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error)
 	CreateTeam(t NewTeam) (int, error)
+	AssignTeamToLeagueSeason(tls TeamLeagueSeason) (int, error)
 }
 
 type repository struct {
@@ -75,7 +76,7 @@ func (r *repository) GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error
 	}
 	defer rows.Close()
 
-	var result []player.PlayerShort
+	result := []player.PlayerShort{}
 	for rows.Next() {
 		var p player.PlayerShort
 		if err := rows.Scan(&p.ID, &p.FullName, &p.Position, &p.Photo_URL, &p.Team); err != nil {
@@ -84,4 +85,16 @@ func (r *repository) GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error
 		result = append(result, p)
 	}
 	return result, nil
+}
+
+func (r *repository) AssignTeamToLeagueSeason(tls TeamLeagueSeason) (int, error) {
+	var id int
+	err := r.db.QueryRow(
+		"INSERT INTO team_league_season (team_id, league_id, season_id) VALUES ($1, $2, $3) RETURNING id",
+		tls.TeamID, tls.LeagueID, tls.SeasonID,
+	).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }

@@ -4,6 +4,7 @@ type Usecase interface {
 	GetTeamCardByID(id int) (*TeamCard, error)
 	GetTeams() ([]TeamCard, error)
 	CreateTeam(t NewTeam) (int, error)
+	AssignTeamToLeagueSeason(tls TeamLeagueSeason) (int, error)
 }
 
 type usecase struct {
@@ -28,9 +29,24 @@ func (u *usecase) GetTeamCardByID(id int) (*TeamCard, error) {
 }
 
 func (u *usecase) GetTeams() ([]TeamCard, error) {
-	return u.repo.GetTeams()
+	teams, err := u.repo.GetTeams()
+	if err != nil {
+		return nil, err
+	}
+	for i := range teams {
+		players, err := u.repo.GetPlayersByTeamID(teams[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		teams[i].Players = players
+	}
+	return teams, nil
 }
 
 func (u *usecase) CreateTeam(t NewTeam) (int, error) {
 	return u.repo.CreateTeam(t)
+}
+
+func (u *usecase) AssignTeamToLeagueSeason(tls TeamLeagueSeason) (int, error) {
+	return u.repo.AssignTeamToLeagueSeason(tls)
 }
