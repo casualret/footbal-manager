@@ -19,6 +19,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/players", h.getPlayers)
 	r.GET("/players/:id", h.getPlayerCard)
 	r.POST("/players", h.createPlayer)
+	r.POST("/player-team", h.addPlayerToTeam)
 }
 
 func (h *Handler) getPlayerCard(c *gin.Context) {
@@ -45,6 +46,21 @@ func (h *Handler) createPlayer(c *gin.Context) {
 	}
 
 	id, err := h.uc.CreatePlayer(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+func (h *Handler) addPlayerToTeam(c *gin.Context) {
+	var req PlayerTeam
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	id, err := h.uc.AddPlayerToTeam(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
