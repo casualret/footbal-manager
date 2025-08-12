@@ -16,8 +16,7 @@ func NewHandler(u Usecase) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
-	r.GET("/players/search", h.searchPlayers)
-	r.GET("/players", h.getAllPlayers)
+	r.GET("/players", h.getPlayers)
 	r.GET("/players/:id", h.getPlayerCard)
 }
 
@@ -37,27 +36,47 @@ func (h *Handler) getPlayerCard(c *gin.Context) {
 	c.JSON(http.StatusOK, playerCard)
 }
 
-func (h *Handler) getAllPlayers(c *gin.Context) {
-	players, err := h.uc.GetAllPlayers()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, players)
-}
-
-func (h *Handler) searchPlayers(c *gin.Context) {
+func (h *Handler) getPlayers(c *gin.Context) {
 	name := c.Query("name")
-	if name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "name query parameter is required"})
+	leagueStr := c.Query("league")
+	teamStr := c.Query("team")
+
+	var (
+		leagueID int
+		teamID   int
+		err      error
+	)
+
+	if leagueStr != "" {
+		leagueID, err = strconv.Atoi(leagueStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid league id"})
+			return
+		}
+	}
+
+	if teamStr != "" {
+		teamID, err = strconv.Atoi(teamStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid team id"})
+			return
+		}
+	}
+
+	if name == "" && leagueID == 0 && teamID == 0 {
+		players, err := h.uc.GetAllPlayers()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, players)
 		return
 	}
 
-	players, err := h.uc.SearchPlayers(name)
+	players, err := h.uc.SearchPlayers(name, leagueID, teamID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
 	c.JSON(http.StatusOK, players)
 }

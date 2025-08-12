@@ -2,13 +2,14 @@ package player
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type Repository interface {
 	GetPlayerCardByID(id int) (*PlayerCard, error)
 	GetPlayerCardByName(name string) (*PlayerCard, error)
 	GetAllPlayers() ([]PlayerShort, error)
-	SearchPlayers(name string) ([]PlayerShort, error)
+	SearchPlayers(name string, leagueID, teamID int) ([]PlayerShort, error)
 }
 
 type repository struct {
@@ -118,8 +119,8 @@ func (r *repository) GetAllPlayers() ([]PlayerShort, error) {
 	return result, nil
 }
 
-// ===== Поиск игроков =====
-func (r *repository) SearchPlayers(name string) ([]PlayerShort, error) {
+// ===== Поиск и фильтрация игроков =====
+func (r *repository) SearchPlayers(name string, leagueID, teamID int) ([]PlayerShort, error) {
 	query := `
     SELECT
         p.id,
@@ -130,9 +131,28 @@ func (r *repository) SearchPlayers(name string) ([]PlayerShort, error) {
     FROM players p
     JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
     JOIN teams t ON t.id = pth.team_id
-    WHERE p.full_name ILIKE '%' || $1 || '%';
-    `
-	rows, err := r.db.Query(query, name)
+    LEFT JOIN team_league_season tls ON tls.team_id = t.id
+    WHERE 1=1`
+
+	args := []interface{}{}
+	idx := 1
+	if name != "" {
+		query += fmt.Sprintf(" AND p.full_name ILIKE '%%' || $%d || '%%'", idx)
+		args = append(args, name)
+		idx++
+	}
+	if leagueID != 0 {
+		query += fmt.Sprintf(" AND tls.league_id = $%d", idx)
+		args = append(args, leagueID)
+		idx++
+	}
+	if teamID != 0 {
+		query += fmt.Sprintf(" AND t.id = $%d", idx)
+		args = append(args, teamID)
+		idx++
+	}
+
+	rows, err := r.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
