@@ -7,7 +7,6 @@ function PlayerList() {
   const [players, setPlayers] = useState([])
   const [teamMap, setTeamMap] = useState({})
   const [search, setSearch] = useState("")
-        main
 
   useEffect(() => {
     fetch(`${API_URL}/players`)
@@ -66,12 +65,25 @@ function PlayerList() {
 function PlayerCard() {
   const { id } = useParams()
   const [player, setPlayer] = useState(null)
+  const [teamMap, setTeamMap] = useState({})
 
   useEffect(() => {
     fetch(`${API_URL}/players/${id}`)
       .then(res => res.json())
       .then(data => setPlayer(data))
   }, [id])
+
+  useEffect(() => {
+    fetch(`${API_URL}/teams`)
+      .then(res => res.json())
+      .then(data => {
+        const map = {}
+        data.forEach(t => {
+          map[t.name] = t.id
+        })
+        setTeamMap(map)
+      })
+  }, [])
 
   if (!player) return <div className="p-6">Загрузка...</div>
 
@@ -85,7 +97,11 @@ function PlayerCard() {
         />
         <h1 className="text-2xl font-bold text-blue-800 mb-1">{player.full_name}</h1>
         <div className="text-gray-600 text-lg mb-2">{player.position}</div>
-        <div className="text-blue-600 font-semibold mb-4">{player.team}</div>
+        <div className="text-blue-600 font-semibold mb-4">
+          {teamMap[player.team]
+            ? <Link to={`/teams/${teamMap[player.team]}`} className="hover:underline">{player.team}</Link>
+            : player.team}
+        </div>
 
         <div className="grid grid-cols-2 gap-4 text-sm text-gray-800">
           <div><b>Голы:</b> {player.stats.goals}</div>
@@ -184,6 +200,147 @@ function TeamCard() {
   )
 }
 
+function MatchList() {
+  const [matches, setMatches] = useState([])
+  const [teamMap, setTeamMap] = useState({})
+
+  useEffect(() => {
+    fetch(`${API_URL}/matches`)
+      .then(res => res.json())
+      .then(data => setMatches(data))
+    fetch(`${API_URL}/teams`)
+      .then(res => res.json())
+      .then(data => {
+        const map = {}
+        data.forEach(t => {
+          map[t.id] = t.name
+        })
+        setTeamMap(map)
+      })
+  }, [])
+
+  return (
+    <div className="p-6">
+      <h1 className="text-4xl font-bold mb-6 text-center text-blue-800">Матчи</h1>
+      <div className="space-y-4">
+        {matches.map(m => (
+          <div key={m.id} className="bg-white shadow-md border border-gray-200 rounded-xl p-4">
+            <div className="flex justify-between items-center mb-2">
+              <Link to={`/teams/${m.home_team_id}`} className="text-blue-700 hover:underline">
+                {teamMap[m.home_team_id] || m.home_team_id}
+              </Link>
+              <div className="font-bold text-blue-800">
+                {m.home_score} : {m.away_score}
+              </div>
+              <Link to={`/teams/${m.away_team_id}`} className="text-blue-700 hover:underline">
+                {teamMap[m.away_team_id] || m.away_team_id}
+              </Link>
+            </div>
+            <div className="text-sm text-gray-600 mb-2">{m.date}</div>
+            <Link to={`/matches/${m.id}`} className="text-blue-500 hover:underline">
+              Подробнее
+            </Link>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function MatchCard() {
+  const { id } = useParams()
+  const [match, setMatch] = useState(null)
+  const [teamMap, setTeamMap] = useState({})
+  const [playerMap, setPlayerMap] = useState({})
+
+  useEffect(() => {
+    fetch(`${API_URL}/matches/${id}`)
+      .then(res => res.json())
+      .then(data => setMatch(data))
+  }, [id])
+
+  useEffect(() => {
+    fetch(`${API_URL}/teams`)
+      .then(res => res.json())
+      .then(data => {
+        const map = {}
+        data.forEach(t => {
+          map[t.id] = t.name
+        })
+        setTeamMap(map)
+      })
+    fetch(`${API_URL}/players`)
+      .then(res => res.json())
+      .then(data => {
+        const map = {}
+        data.forEach(p => {
+          map[p.id] = p.full_name
+        })
+        setPlayerMap(map)
+      })
+  }, [])
+
+  if (!match) return <div className="p-6">Загрузка...</div>
+
+  return (
+    <div className="max-w-3xl mx-auto p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+        <div className="text-center mb-4">
+          <div className="flex justify-between text-xl font-semibold text-blue-800">
+            <Link to={`/teams/${match.home_team_id}`} className="hover:underline">
+              {teamMap[match.home_team_id] || match.home_team_id}
+            </Link>
+            <div>
+              {match.home_score} : {match.away_score}
+            </div>
+            <Link to={`/teams/${match.away_team_id}`} className="hover:underline">
+              {teamMap[match.away_team_id] || match.away_team_id}
+            </Link>
+          </div>
+          <div className="text-gray-600">{match.date}</div>
+        </div>
+
+        <table className="w-full text-sm text-left">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2">Игрок</th>
+              <th className="py-2">Команда</th>
+              <th className="py-2">Голы</th>
+              <th className="py-2">Передачи</th>
+              <th className="py-2">ЖК</th>
+              <th className="py-2">КК</th>
+            </tr>
+          </thead>
+          <tbody>
+            {match.participants.map(p => (
+              <tr key={p.player_id} className="border-b">
+                <td className="py-2">
+                  <Link to={`/players/${p.player_id}`} className="text-blue-600 hover:underline">
+                    {playerMap[p.player_id] || p.player_id}
+                  </Link>
+                </td>
+                <td className="py-2">
+                  <Link to={`/teams/${p.team_id}`} className="text-blue-600 hover:underline">
+                    {teamMap[p.team_id] || p.team_id}
+                  </Link>
+                </td>
+                <td className="py-2">{p.goals}</td>
+                <td className="py-2">{p.assists}</td>
+                <td className="py-2">{p.yellow_cards}</td>
+                <td className="py-2">{p.red_cards}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <Link to="/matches" className="block mt-6 text-blue-500 hover:underline">
+          ← Назад к списку матчей
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <Router>
@@ -193,6 +350,8 @@ export default function App() {
         <Route path="/players/:id" element={<PlayerCard />} />
         <Route path="/teams" element={<TeamList />} />
         <Route path="/teams/:id" element={<TeamCard />} />
+        <Route path="/matches" element={<MatchList />} />
+        <Route path="/matches/:id" element={<MatchCard />} />
       </Routes>
     </Router>
   )
