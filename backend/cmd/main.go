@@ -3,6 +3,7 @@ package main
 import (
 	"backend/config"
 	"backend/internal/player"
+	"backend/internal/team"
 	"backend/pkg/db"
 	"github.com/gin-contrib/cors"
 	"time"
@@ -15,9 +16,13 @@ func main() {
 	database := db.NewPostgres()
 	defer database.Close()
 
-	repo := player.NewRepository(database)
-	usecase := player.NewUsecase(repo)
-	handler := player.NewHandler(usecase)
+	playerRepo := player.NewRepository(database)
+	playerUsecase := player.NewUsecase(playerRepo)
+	playerHandler := player.NewHandler(playerUsecase)
+
+	teamRepo := team.NewRepository(database)
+	teamUsecase := team.NewUsecase(teamRepo)
+	teamHandler := team.NewHandler(teamUsecase)
 
 	r := gin.Default()
 	r.Static("/static", "./static")
@@ -31,6 +36,7 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	handler.RegisterRoutes(r)
+	playerHandler.RegisterRoutes(r)
+	teamHandler.RegisterRoutes(r)
 	r.Run(":8080")
 }
