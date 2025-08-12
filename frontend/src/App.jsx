@@ -7,7 +7,6 @@ function PlayerList() {
   const [players, setPlayers] = useState([])
   const [teamMap, setTeamMap] = useState({})
   const [search, setSearch] = useState("")
-        main
 
   useEffect(() => {
     fetch(`${API_URL}/players`)
@@ -66,12 +65,25 @@ function PlayerList() {
 function PlayerCard() {
   const { id } = useParams()
   const [player, setPlayer] = useState(null)
+  const [teamMap, setTeamMap] = useState({})
 
   useEffect(() => {
     fetch(`${API_URL}/players/${id}`)
       .then(res => res.json())
       .then(data => setPlayer(data))
   }, [id])
+
+  useEffect(() => {
+    fetch(`${API_URL}/teams`)
+      .then(res => res.json())
+      .then(data => {
+        const map = {}
+        data.forEach(t => {
+          map[t.name] = t.id
+        })
+        setTeamMap(map)
+      })
+  }, [])
 
   if (!player) return <div className="p-6">Загрузка...</div>
 
@@ -85,7 +97,11 @@ function PlayerCard() {
         />
         <h1 className="text-2xl font-bold text-blue-800 mb-1">{player.full_name}</h1>
         <div className="text-gray-600 text-lg mb-2">{player.position}</div>
-        <div className="text-blue-600 font-semibold mb-4">{player.team}</div>
+        <div className="text-blue-600 font-semibold mb-4">
+          {teamMap[player.team]
+            ? <Link to={`/teams/${teamMap[player.team]}`} className="hover:underline">{player.team}</Link>
+            : player.team}
+        </div>
 
         <div className="grid grid-cols-2 gap-4 text-sm text-gray-800">
           <div><b>Голы:</b> {player.stats.goals}</div>
