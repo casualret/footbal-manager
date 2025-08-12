@@ -6,6 +6,9 @@ const API_URL = "http://localhost:8080"
 function PlayerList() {
   const [players, setPlayers] = useState([])
   const [teamMap, setTeamMap] = useState({})
+  g4y3uv-codex/add-teams-page-with-player-links
+  const [search, setSearch] = useState("")
+        main
 
   useEffect(() => {
     fetch(`${API_URL}/players`)
@@ -23,8 +26,17 @@ function PlayerList() {
   return (
     <div className="p-6">
       <h1 className="text-4xl font-bold mb-6 text-center text-blue-800">Футбольная Лига</h1>
+      <input
+        type="text"
+        placeholder="Поиск по имени"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        className="mb-6 p-2 border rounded w-full sm:w-1/2 mx-auto block"
+      />
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-        {players.map(p => (
+        {players
+          .filter(p => p.full_name.toLowerCase().includes(search.toLowerCase()))
+          .map(p => (
           <Link to={`/players/${p.id}`} key={p.id}>
             <div className="bg-white shadow-md border border-gray-200 rounded-xl p-4 hover:shadow-xl transition">
               <div className="flex items-center gap-4">
