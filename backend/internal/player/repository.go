@@ -12,6 +12,7 @@ type Repository interface {
 	GetAllPlayers() ([]PlayerShort, error)
 	SearchPlayers(name string, leagueID, teamID int) ([]PlayerShort, error)
 	CreatePlayer(p NewPlayer) (int, error)
+	AddPlayerToTeam(pt PlayerTeam) (int, error)
 }
 
 type repository struct {
@@ -192,6 +193,37 @@ func (r *repository) CreatePlayer(p NewPlayer) (int, error) {
 		"INSERT INTO player_team_history (player_id, team_id, start_date) VALUES ($1, $2, $3)",
 		id, p.TeamID, time.Now(),
 	)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (r *repository) AddPlayerToTeam(pt PlayerTeam) (int, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = tx.Exec(
+		"UPDATE player_team_history SET end_date = $1 WHERE player_id = $2 AND end_date IS NULL",
+		time.Now(), pt.PlayerID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	var id int
+	err = tx.QueryRow(
+		"INSERT INTO player_team_history (player_id, team_id, start_date) VALUES ($1, $2, $3) RETURNING id",
+		pt.PlayerID, pt.TeamID, time.Now(),
+	).Scan(&id)
 	if err != nil {
 		tx.Rollback()
 		return 0, err
