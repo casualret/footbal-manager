@@ -17,7 +17,7 @@ function PlayerList() {
       <h1 className="text-4xl font-bold mb-6 text-center text-blue-800">Футбольная Лига</h1>
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {players.map(p => (
-          <Link to={`/players/${encodeURIComponent(p.full_name)}`} key={p.full_name}>
+          <Link to={`/players/${p.id}`} key={p.id}>
             <div className="bg-white shadow-md border border-gray-200 rounded-xl p-4 hover:shadow-xl transition">
               <div className="flex items-center gap-4">
                 <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
@@ -41,14 +41,14 @@ function PlayerList() {
 }
 
 function PlayerCard() {
-  const { name } = useParams()
+  const { id } = useParams()
   const [player, setPlayer] = useState(null)
 
   useEffect(() => {
-    fetch(`${API_URL}/players/${name}`)
+    fetch(`${API_URL}/players/${id}`)
       .then(res => res.json())
       .then(data => setPlayer(data))
-  }, [name])
+  }, [id])
 
   if (!player) return <div className="p-6">Загрузка...</div>
 
@@ -65,12 +65,8 @@ function PlayerCard() {
         <div className="text-blue-600 font-semibold mb-4">{player.team}</div>
 
         <div className="grid grid-cols-2 gap-4 text-sm text-gray-800">
-          <div><b>Игры:</b> {player.stats.games}</div>
-          <div><b>Победы:</b> {player.stats.wins}</div>
-          <div><b>Поражения:</b> {player.stats.losses}</div>
           <div><b>Голы:</b> {player.stats.goals}</div>
           <div><b>Передачи:</b> {player.stats.assists}</div>
-          <div><b>Штрафы:</b> {player.stats.penalties}</div>
           <div><b>ЖК:</b> {player.stats.yellow_cards}</div>
           <div><b>КК:</b> {player.stats.red_cards}</div>
         </div>
@@ -85,8 +81,9 @@ export default function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<PlayerList />} />
         <Route path="/players" element={<PlayerList />} />
-        <Route path="/players/:name" element={<PlayerCard />} />
+        <Route path="/players/:id" element={<PlayerCard />} />
       </Routes>
     </Router>
   )
