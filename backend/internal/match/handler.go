@@ -18,13 +18,13 @@ func NewHandler(u Usecase) *Handler {
 
 // RegisterRoutes registers match related endpoints
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
-	r.POST("/api/rounds", h.createRound)
-	r.POST("/api/matches", h.createMatch)
-	r.POST("/api/match-participation", h.addMatchParticipation)
-	r.POST("/api/player-stats", h.addPlayerStats)
-	r.PATCH("/api/matches/:id", h.updateMatchScore)
-	r.GET("/api/matches", h.listMatches)
-	r.GET("/api/matches/:id", h.getMatch)
+	r.POST("/rounds", h.createRound)
+	r.POST("/matches", h.createMatch)
+	r.POST("/match-participation", h.addMatchParticipation)
+	r.POST("/player-stats", h.addPlayerStats)
+	r.PATCH("/matches/:id", h.updateMatchScore)
+	r.GET("/matches", h.listMatches)
+	r.GET("/matches/:id", h.getMatch)
 }
 
 func (h *Handler) createRound(c *gin.Context) {
