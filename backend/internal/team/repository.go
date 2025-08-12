@@ -10,6 +10,7 @@ type Repository interface {
 	GetTeams() ([]TeamCard, error)
 	GetTeamByID(id int) (*TeamCard, error)
 	GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error)
+	CreateTeam(t NewTeam) (int, error)
 }
 
 type repository struct {
@@ -18,6 +19,18 @@ type repository struct {
 
 func NewRepository(db *sql.DB) Repository {
 	return &repository{db: db}
+}
+
+func (r *repository) CreateTeam(t NewTeam) (int, error) {
+	var id int
+	err := r.db.QueryRow(
+		"INSERT INTO teams (name, logo_url) VALUES ($1, $2) RETURNING id",
+		t.Name, t.LogoURL,
+	).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (r *repository) GetTeams() ([]TeamCard, error) {
