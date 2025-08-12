@@ -3,6 +3,7 @@ package main
 import (
 	"backend/config"
 	"backend/internal/league"
+	"backend/internal/match"
 	"backend/internal/player"
 	"backend/internal/team"
 	"backend/pkg/db"
@@ -29,12 +30,16 @@ func main() {
 	leagueUsecase := league.NewUsecase(leagueRepo)
 	leagueHandler := league.NewHandler(leagueUsecase)
 
+	matchRepo := match.NewRepository(database)
+	matchUsecase := match.NewUsecase(matchRepo)
+	matchHandler := match.NewHandler(matchUsecase)
+
 	r := gin.Default()
 	r.Static("/static", "./static")
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
@@ -44,5 +49,6 @@ func main() {
 	playerHandler.RegisterRoutes(r)
 	teamHandler.RegisterRoutes(r)
 	leagueHandler.RegisterRoutes(r)
+	matchHandler.RegisterRoutes(r)
 	r.Run(":8080")
 }
