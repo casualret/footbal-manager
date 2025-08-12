@@ -6,7 +6,6 @@ const API_URL = "http://localhost:8080"
 function PlayerList() {
   const [players, setPlayers] = useState([])
   const [teamMap, setTeamMap] = useState({})
-  g4y3uv-codex/add-teams-page-with-player-links
   const [search, setSearch] = useState("")
         main
 
