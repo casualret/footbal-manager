@@ -30,7 +30,7 @@ type MatchParticipation struct {
 type PlayerStats struct {
 	MatchParticipationID int `json:"match_participation_id"`
 	Goals                int `json:"goals"`
-	Assists              int `json:"assists"`
+	Passes               int `json:"passes"`
 	YellowCards          int `json:"yellow_cards"`
 	RedCards             int `json:"red_cards"`
 }
@@ -59,7 +59,7 @@ type ParticipantStats struct {
 	TeamID      int  `json:"team_id"`
 	IsStarting  bool `json:"is_starting"`
 	Goals       int  `json:"goals"`
-	Assists     int  `json:"assists"`
+	Passes      int  `json:"passes"`
 	YellowCards int  `json:"yellow_cards"`
 	RedCards    int  `json:"red_cards"`
 }

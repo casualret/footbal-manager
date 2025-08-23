@@ -2,9 +2,11 @@ package player
 
 type Stats struct {
 	Goals       int `json:"goals"`
-	Assists     int `json:"assists"`
+	Passes      int `json:"passes"`
 	YellowCards int `json:"yellow_cards"`
 	RedCards    int `json:"red_cards"`
+	Wins        int `json:"wins"`
+	Losses      int `json:"losses"`
 }
 
 type PlayerCard struct {

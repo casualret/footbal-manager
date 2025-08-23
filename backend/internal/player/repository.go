@@ -33,9 +33,11 @@ func (r *repository) GetPlayerCardByID(id int) (*PlayerCard, error) {
         p.photo_url,
         t.name AS team_name,
         COALESCE(v.total_goals, 0),
-        COALESCE(v.total_assists, 0),
+        COALESCE(v.total_passes, 0),
         COALESCE(v.total_yellow, 0),
-        COALESCE(v.total_red, 0)
+        COALESCE(v.total_red, 0),
+        COALESCE(v.total_wins, 0),
+        COALESCE(v.total_losses, 0)
     FROM players p
     JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
     JOIN teams t ON t.id = pth.team_id
@@ -47,7 +49,7 @@ func (r *repository) GetPlayerCardByID(id int) (*PlayerCard, error) {
 
 	err := r.db.QueryRow(query, id).Scan(
 		&card.ID, &card.FullName, &card.Position, &card.Photo_URL, &card.Team,
-		&stats.Goals, &stats.Assists, &stats.YellowCards, &stats.RedCards,
+		&stats.Goals, &stats.Passes, &stats.YellowCards, &stats.RedCards, &stats.Wins, &stats.Losses,
 	)
 	if err != nil {
 		return nil, err
@@ -67,9 +69,11 @@ func (r *repository) GetPlayerCardByName(name string) (*PlayerCard, error) {
         p.photo_url,
         t.name AS team_name,
         COALESCE(v.total_goals, 0),
-        COALESCE(v.total_assists, 0),
+        COALESCE(v.total_passes, 0),
         COALESCE(v.total_yellow, 0),
-        COALESCE(v.total_red, 0)
+        COALESCE(v.total_red, 0),
+        COALESCE(v.total_wins, 0),
+        COALESCE(v.total_losses, 0)
     FROM players p
     JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
     JOIN teams t ON t.id = pth.team_id
@@ -81,7 +85,7 @@ func (r *repository) GetPlayerCardByName(name string) (*PlayerCard, error) {
 
 	err := r.db.QueryRow(query, name).Scan(
 		&card.ID, &card.FullName, &card.Position, &card.Photo_URL, &card.Team,
-		&stats.Goals, &stats.Assists, &stats.YellowCards, &stats.RedCards,
+		&stats.Goals, &stats.Passes, &stats.YellowCards, &stats.RedCards, &stats.Wins, &stats.Losses,
 	)
 	if err != nil {
 		return nil, err
