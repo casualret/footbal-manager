@@ -2,9 +2,12 @@ package player
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -20,6 +23,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/players/:uid", h.getPlayerCard)
 	r.POST("/players", h.createPlayer)
 	r.POST("/player-team", h.addPlayerToTeam)
+	r.POST("/players/:uid/photo", h.uploadPlayerPhoto)
 }
 
 func (h *Handler) getPlayerCard(c *gin.Context) {
@@ -61,6 +65,35 @@ func (h *Handler) addPlayerToTeam(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+func (h *Handler) uploadPlayerPhoto(c *gin.Context) {
+	uid := c.Param("uid")
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := os.MkdirAll("uploads/players", os.ModePerm); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	filename := uuid.New().String() + filepath.Ext(file.Filename)
+	dst := filepath.Join("uploads/players", filename)
+	if err := c.SaveUploadedFile(file, dst); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	url := "/media/players/" + filename
+	if err := h.uc.UpdatePhotoURL(uid, url); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"photo_url": url})
 }
 
 func (h *Handler) getPlayers(c *gin.Context) {
