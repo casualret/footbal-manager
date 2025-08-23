@@ -33,7 +33,7 @@ func (r *repository) GetPlayerCardByUID(uid string) (*PlayerCard, error) {
         p.uid,
         p.full_name,
         p.position,
-        p.photo_url,
+        COALESCE(p.photo_url, '') AS photo_url,
         t.name AS team_name,
         COALESCE(v.total_goals, 0),
         COALESCE(v.total_passes, 0),
@@ -70,7 +70,7 @@ func (r *repository) GetPlayerCardByName(name string) (*PlayerCard, error) {
         p.uid,
         p.full_name,
         p.position,
-        p.photo_url,
+        COALESCE(p.photo_url, '') AS photo_url,
         t.name AS team_name,
         COALESCE(v.total_goals, 0),
         COALESCE(v.total_passes, 0),
@@ -107,7 +107,7 @@ func (r *repository) GetAllPlayers() ([]PlayerShort, error) {
         p.uid,
         p.full_name,
         p.position,
-        p.photo_url,
+        COALESCE(p.photo_url, '') AS photo_url,
         t.name AS team_name
     FROM players p
     JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
@@ -139,7 +139,7 @@ func (r *repository) SearchPlayers(name string, leagueID, teamID int) ([]PlayerS
         p.uid,
         p.full_name,
         p.position,
-        p.photo_url,
+        COALESCE(p.photo_url, '') AS photo_url,
         t.name AS team_name
     FROM players p
     JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL

@@ -64,7 +64,7 @@ func (r *repository) GetTeamByID(id int) (*TeamCard, error) {
 
 func (r *repository) GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error) {
 	query := `
-        SELECT p.id, p.uid, p.full_name, p.position, p.photo_url, t.name
+        SELECT p.id, p.uid, p.full_name, p.position, COALESCE(p.photo_url, '') AS photo_url, t.name
         FROM players p
         JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
         JOIN teams t ON t.id = pth.team_id
