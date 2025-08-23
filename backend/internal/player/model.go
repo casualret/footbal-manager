@@ -11,6 +11,7 @@ type Stats struct {
 
 type PlayerCard struct {
 	ID        int    `json:"id"`
+	UID       string `json:"uid"`
 	FullName  string `json:"full_name"`
 	Position  string `json:"position"`
 	Photo_URL string `json:"photo_url"`
@@ -20,6 +21,7 @@ type PlayerCard struct {
 
 type PlayerShort struct {
 	ID        int    `json:"id"`
+	UID       string `json:"uid"`
 	FullName  string `json:"full_name"`
 	Position  string `json:"position"`
 	Photo_URL string `json:"photo_url"`

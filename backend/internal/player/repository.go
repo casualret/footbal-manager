@@ -4,14 +4,16 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Repository interface {
-	GetPlayerCardByID(id int) (*PlayerCard, error)
+	GetPlayerCardByUID(uid string) (*PlayerCard, error)
 	GetPlayerCardByName(name string) (*PlayerCard, error)
 	GetAllPlayers() ([]PlayerShort, error)
 	SearchPlayers(name string, leagueID, teamID int) ([]PlayerShort, error)
-	CreatePlayer(p NewPlayer) (int, error)
+	CreatePlayer(p NewPlayer) (string, error)
 	AddPlayerToTeam(pt PlayerTeam) (int, error)
 }
 
@@ -23,11 +25,12 @@ func NewRepository(db *sql.DB) Repository {
 	return &repository{db: db}
 }
 
-// ===== Карточка игрока по ID =====
-func (r *repository) GetPlayerCardByID(id int) (*PlayerCard, error) {
+// ===== Карточка игрока по UID =====
+func (r *repository) GetPlayerCardByUID(uid string) (*PlayerCard, error) {
 	query := `
     SELECT
         p.id,
+        p.uid,
         p.full_name,
         p.position,
         p.photo_url,
@@ -42,13 +45,13 @@ func (r *repository) GetPlayerCardByID(id int) (*PlayerCard, error) {
     JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
     JOIN teams t ON t.id = pth.team_id
     LEFT JOIN v_player_total_stats v ON v.player_id = p.id
-    WHERE p.id = $1;
+    WHERE p.uid = $1;
     `
 	var card PlayerCard
 	var stats Stats
 
-	err := r.db.QueryRow(query, id).Scan(
-		&card.ID, &card.FullName, &card.Position, &card.Photo_URL, &card.Team,
+	err := r.db.QueryRow(query, uid).Scan(
+		&card.ID, &card.UID, &card.FullName, &card.Position, &card.Photo_URL, &card.Team,
 		&stats.Goals, &stats.Passes, &stats.YellowCards, &stats.RedCards, &stats.Wins, &stats.Losses,
 	)
 	if err != nil {
@@ -64,6 +67,7 @@ func (r *repository) GetPlayerCardByName(name string) (*PlayerCard, error) {
 	query := `
     SELECT
         p.id,
+        p.uid,
         p.full_name,
         p.position,
         p.photo_url,
@@ -84,7 +88,7 @@ func (r *repository) GetPlayerCardByName(name string) (*PlayerCard, error) {
 	var stats Stats
 
 	err := r.db.QueryRow(query, name).Scan(
-		&card.ID, &card.FullName, &card.Position, &card.Photo_URL, &card.Team,
+		&card.ID, &card.UID, &card.FullName, &card.Position, &card.Photo_URL, &card.Team,
 		&stats.Goals, &stats.Passes, &stats.YellowCards, &stats.RedCards, &stats.Wins, &stats.Losses,
 	)
 	if err != nil {
@@ -100,6 +104,7 @@ func (r *repository) GetAllPlayers() ([]PlayerShort, error) {
 	query := `
     SELECT
         p.id,
+        p.uid,
         p.full_name,
         p.position,
         p.photo_url,
@@ -117,7 +122,7 @@ func (r *repository) GetAllPlayers() ([]PlayerShort, error) {
 	var result []PlayerShort
 	for rows.Next() {
 		var p PlayerShort
-		if err := rows.Scan(&p.ID, &p.FullName, &p.Position, &p.Photo_URL, &p.Team); err != nil {
+		if err := rows.Scan(&p.ID, &p.UID, &p.FullName, &p.Position, &p.Photo_URL, &p.Team); err != nil {
 			return nil, err
 		}
 		result = append(result, p)
@@ -131,6 +136,7 @@ func (r *repository) SearchPlayers(name string, leagueID, teamID int) ([]PlayerS
 	query := `
     SELECT
         p.id,
+        p.uid,
         p.full_name,
         p.position,
         p.photo_url,
@@ -168,7 +174,7 @@ func (r *repository) SearchPlayers(name string, leagueID, teamID int) ([]PlayerS
 	var result []PlayerShort
 	for rows.Next() {
 		var p PlayerShort
-		if err := rows.Scan(&p.ID, &p.FullName, &p.Position, &p.Photo_URL, &p.Team); err != nil {
+		if err := rows.Scan(&p.ID, &p.UID, &p.FullName, &p.Position, &p.Photo_URL, &p.Team); err != nil {
 			return nil, err
 		}
 		result = append(result, p)
@@ -177,35 +183,36 @@ func (r *repository) SearchPlayers(name string, leagueID, teamID int) ([]PlayerS
 	return result, nil
 }
 
-func (r *repository) CreatePlayer(p NewPlayer) (int, error) {
+func (r *repository) CreatePlayer(p NewPlayer) (string, error) {
+	uid := uuid.NewString()
 	tx, err := r.db.Begin()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	var id int
+	var playerID int
 	err = tx.QueryRow(
-		"INSERT INTO players (full_name, position, photo_url) VALUES ($1, $2, $3) RETURNING id",
-		p.FullName, p.Position, p.PhotoURL,
-	).Scan(&id)
+		"INSERT INTO players (uid, full_name, position, photo_url) VALUES ($1, $2, $3, $4) RETURNING id",
+		uid, p.FullName, p.Position, p.PhotoURL,
+	).Scan(&playerID)
 	if err != nil {
 		tx.Rollback()
-		return 0, err
+		return "", err
 	}
 
 	_, err = tx.Exec(
 		"INSERT INTO player_team_history (player_id, team_id, start_date) VALUES ($1, $2, $3)",
-		id, p.TeamID, time.Now(),
+		playerID, p.TeamID, time.Now(),
 	)
 	if err != nil {
 		tx.Rollback()
-		return 0, err
+		return "", err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return 0, err
+		return "", err
 	}
-	return id, nil
+	return uid, nil
 }
 
 func (r *repository) AddPlayerToTeam(pt PlayerTeam) (int, error) {

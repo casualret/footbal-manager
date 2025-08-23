@@ -47,7 +47,7 @@ function PlayerList() {
             p.full_name.toLowerCase().includes(search.toLowerCase()),
           )
           .map((p) => (
-            <Link to={`/players/${p.id}`} key={p.id}>
+            <Link to={`/players/${p.uid}`} key={p.uid}>
               <div className="bg-white shadow-md border border-gray-200 rounded-xl p-4 hover:shadow-xl transition">
                 <div className="flex items-center gap-4">
                   <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
@@ -88,15 +88,15 @@ function PlayerList() {
 }
 
 function PlayerCard() {
-  const { id } = useParams();
+  const { uid } = useParams();
   const [player, setPlayer] = useState(null);
   const [teamMap, setTeamMap] = useState({});
 
   useEffect(() => {
-    fetch(`${API_URL}/players/${id}`)
+    fetch(`${API_URL}/players/${uid}`)
       .then((res) => res.json())
       .then((data) => setPlayer(data));
-  }, [id]);
+    }, [uid]);
 
   useEffect(() => {
     fetch(`${API_URL}/teams`)
@@ -238,8 +238,8 @@ function TeamCard() {
         <h1 className="text-2xl font-bold text-blue-800 mb-4">{team.name}</h1>
 
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
-          {team.players.map((p) => (
-            <Link to={`/players/${p.id}`} key={p.id}>
+        {team.players.map((p) => (
+            <Link to={`/players/${p.uid}`} key={p.uid}>
               <div className="bg-white shadow-md border border-gray-200 rounded-xl p-4 hover:shadow-xl transition">
                 <div className="flex items-center gap-4">
                   <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
@@ -360,7 +360,7 @@ function MatchCard() {
       .then((data) => {
         const map = {};
         data.forEach((p) => {
-          map[p.id] = p.full_name;
+          map[p.id] = { name: p.full_name, uid: p.uid };
         });
         setPlayerMap(map);
       });
@@ -408,10 +408,10 @@ function MatchCard() {
               <tr key={p.player_id} className="border-b">
                 <td className="py-2">
                   <Link
-                    to={`/players/${p.player_id}`}
+                    to={`/players/${playerMap[p.player_id]?.uid || ""}`}
                     className="text-blue-600 hover:underline"
                   >
-                    {playerMap[p.player_id] || p.player_id}
+                    {playerMap[p.player_id]?.name || p.player_id}
                   </Link>
                 </td>
                 <td className="py-2">
@@ -448,7 +448,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<PlayerList />} />
         <Route path="/players" element={<PlayerList />} />
-        <Route path="/players/:id" element={<PlayerCard />} />
+        <Route path="/players/:uid" element={<PlayerCard />} />
         <Route path="/teams" element={<TeamList />} />
         <Route path="/teams/:id" element={<TeamCard />} />
         <Route path="/matches" element={<MatchList />} />

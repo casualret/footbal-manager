@@ -51,6 +51,7 @@ CREATE TABLE team_league_season (
 -- Игроки
 CREATE TABLE players (
     id SERIAL PRIMARY KEY,
+    uid TEXT NOT NULL UNIQUE,
     full_name TEXT NOT NULL,
     position TEXT NOT NULL,
     photo_url TEXT
