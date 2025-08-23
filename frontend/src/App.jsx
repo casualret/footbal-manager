@@ -53,8 +53,9 @@ function PlayerList() {
                   <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
                     <img
                       src={
-                        p.photo_url ||
-                        "https://via.placeholder.com/80x80?text=?"
+                        p.photo_url
+                          ? `${API_URL}${p.photo_url}`
+                          : "https://via.placeholder.com/80x80?text=?"
                       }
                       alt={p.full_name}
                       className="object-cover w-full h-full"
@@ -117,8 +118,9 @@ function PlayerCard() {
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
         <img
           src={
-            player.photo_url ||
-            "https://via.placeholder.com/400x200?text=ФОТО+ИГРОКА"
+            player.photo_url
+              ? `${API_URL}${player.photo_url}`
+              : "https://via.placeholder.com/400x200?text=ФОТО+ИГРОКА"
           }
           alt={player.full_name}
           className="w-full h-48 object-cover rounded-md mb-4 border"
@@ -191,15 +193,17 @@ function TeamList() {
           <Link to={`/teams/${t.id}`} key={t.id}>
             <div className="bg-white shadow-md border border-gray-200 rounded-xl p-4 hover:shadow-xl transition">
               <div className="flex items-center gap-4">
-                <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
-                  <img
-                    src={
-                      t.logo_url || "https://via.placeholder.com/80x80?text=?"
-                    }
-                    alt={t.name}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
+                  <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
+                    <img
+                      src={
+                        t.logo_url
+                          ? `${API_URL}${t.logo_url}`
+                          : "https://via.placeholder.com/80x80?text=?"
+                      }
+                      alt={t.name}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
                 <div className="font-semibold text-lg text-blue-700">
                   {t.name}
                 </div>
@@ -229,8 +233,9 @@ function TeamCard() {
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
         <img
           src={
-            team.logo_url ||
-            "https://via.placeholder.com/400x200?text=ЛОГО+КОМАНДЫ"
+            team.logo_url
+              ? `${API_URL}${team.logo_url}`
+              : "https://via.placeholder.com/400x200?text=ЛОГО+КОМАНДЫ"
           }
           alt={team.name}
           className="w-full h-48 object-cover rounded-md mb-4 border"
@@ -242,16 +247,17 @@ function TeamCard() {
             <Link to={`/players/${p.uid}`} key={p.uid}>
               <div className="bg-white shadow-md border border-gray-200 rounded-xl p-4 hover:shadow-xl transition">
                 <div className="flex items-center gap-4">
-                  <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
-                    <img
-                      src={
-                        p.photo_url ||
-                        "https://via.placeholder.com/80x80?text=?"
-                      }
-                      alt={p.full_name}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
+                    <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
+                      <img
+                        src={
+                          p.photo_url
+                            ? `${API_URL}${p.photo_url}`
+                            : "https://via.placeholder.com/80x80?text=?"
+                        }
+                        alt={p.full_name}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
                   <div>
                     <div className="font-semibold text-lg text-blue-700">
                       {p.full_name}
