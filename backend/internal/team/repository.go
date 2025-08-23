@@ -64,7 +64,7 @@ func (r *repository) GetTeamByID(id int) (*TeamCard, error) {
 
 func (r *repository) GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error) {
 	query := `
-        SELECT p.id, p.full_name, p.position, p.photo_url, t.name
+        SELECT p.id, p.uid, p.full_name, p.position, p.photo_url, t.name
         FROM players p
         JOIN player_team_history pth ON p.id = pth.player_id AND pth.end_date IS NULL
         JOIN teams t ON t.id = pth.team_id
@@ -79,7 +79,7 @@ func (r *repository) GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error
 	result := []player.PlayerShort{}
 	for rows.Next() {
 		var p player.PlayerShort
-		if err := rows.Scan(&p.ID, &p.FullName, &p.Position, &p.Photo_URL, &p.Team); err != nil {
+		if err := rows.Scan(&p.ID, &p.UID, &p.FullName, &p.Position, &p.Photo_URL, &p.Team); err != nil {
 			return nil, err
 		}
 		result = append(result, p)
