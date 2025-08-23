@@ -201,7 +201,7 @@ function TeamList() {
                       "https://via.placeholder.com/80x80?text=?"
                     }
                     alt={t.name}
-                    className="object-cover w-full h-full"
+                    className="w-full max-h-96 object-contain rounded-md mb-4 border"
                   />
                 </div>
                 <div className="font-semibold text-lg text-blue-700">
