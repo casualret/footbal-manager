@@ -15,6 +15,7 @@ type Repository interface {
 	SearchPlayers(name string, leagueID, teamID int) ([]PlayerShort, error)
 	CreatePlayer(p NewPlayer) (string, error)
 	AddPlayerToTeam(pt PlayerTeam) (int, error)
+	UpdatePhotoURL(uid, url string) error
 }
 
 type repository struct {
@@ -244,4 +245,9 @@ func (r *repository) AddPlayerToTeam(pt PlayerTeam) (int, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (r *repository) UpdatePhotoURL(uid, url string) error {
+	_, err := r.db.Exec("UPDATE players SET photo_url = $1 WHERE uid = $2", url, uid)
+	return err
 }

@@ -36,6 +36,7 @@ func main() {
 
 	r := gin.Default()
 	r.Static("/static", "./static")
+	r.Static("/media", "./uploads")
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},

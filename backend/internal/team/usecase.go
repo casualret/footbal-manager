@@ -5,6 +5,7 @@ type Usecase interface {
 	GetTeams() ([]TeamCard, error)
 	CreateTeam(t NewTeam) (int, error)
 	AssignTeamToLeagueSeason(tls TeamLeagueSeason) (int, error)
+	UpdateLogoURL(id int, url string) error
 }
 
 type usecase struct {
@@ -49,4 +50,8 @@ func (u *usecase) CreateTeam(t NewTeam) (int, error) {
 
 func (u *usecase) AssignTeamToLeagueSeason(tls TeamLeagueSeason) (int, error) {
 	return u.repo.AssignTeamToLeagueSeason(tls)
+}
+
+func (u *usecase) UpdateLogoURL(id int, url string) error {
+	return u.repo.UpdateLogoURL(id, url)
 }

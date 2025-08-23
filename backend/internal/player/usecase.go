@@ -7,6 +7,7 @@ type Usecase interface {
 	SearchPlayers(name string, leagueID, teamID int) ([]PlayerShort, error)
 	CreatePlayer(p NewPlayer) (string, error)
 	AddPlayerToTeam(pt PlayerTeam) (int, error)
+	UpdatePhotoURL(uid, url string) error
 }
 
 type usecase struct {
@@ -39,4 +40,8 @@ func (u *usecase) CreatePlayer(p NewPlayer) (string, error) {
 
 func (u *usecase) AddPlayerToTeam(pt PlayerTeam) (int, error) {
 	return u.repo.AddPlayerToTeam(pt)
+}
+
+func (u *usecase) UpdatePhotoURL(uid, url string) error {
+	return u.repo.UpdatePhotoURL(uid, url)
 }
