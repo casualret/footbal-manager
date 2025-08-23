@@ -60,8 +60,8 @@ func (r *repository) CreateMatchParticipation(mp MatchParticipation) (int, error
 func (r *repository) CreatePlayerStats(ps PlayerStats) (int, error) {
 	var id int
 	err := r.db.QueryRow(
-		"INSERT INTO player_stats (match_participation_id, goals, assists, yellow_cards, red_cards) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-		ps.MatchParticipationID, ps.Goals, ps.Assists, ps.YellowCards, ps.RedCards,
+		"INSERT INTO player_stats (match_participation_id, goals, passes, yellow_cards, red_cards) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		ps.MatchParticipationID, ps.Goals, ps.Passes, ps.YellowCards, ps.RedCards,
 	).Scan(&id)
 	if err != nil {
 		return 0, err
@@ -109,7 +109,7 @@ func (r *repository) GetMatchDetails(id int) (*MatchDetails, error) {
 	}
 
 	rows, err := r.db.Query(
-		"SELECT mp.player_id, mp.team_id, mp.is_starting, COALESCE(ps.goals, 0), COALESCE(ps.assists, 0), COALESCE(ps.yellow_cards, 0), COALESCE(ps.red_cards, 0) FROM match_participation mp LEFT JOIN player_stats ps ON ps.match_participation_id = mp.id WHERE mp.match_id = $1",
+		"SELECT mp.player_id, mp.team_id, mp.is_starting, COALESCE(ps.goals, 0), COALESCE(ps.passes, 0), COALESCE(ps.yellow_cards, 0), COALESCE(ps.red_cards, 0) FROM match_participation mp LEFT JOIN player_stats ps ON ps.match_participation_id = mp.id WHERE mp.match_id = $1",
 		id,
 	)
 	if err != nil {
@@ -120,7 +120,7 @@ func (r *repository) GetMatchDetails(id int) (*MatchDetails, error) {
 	var participants []ParticipantStats
 	for rows.Next() {
 		var p ParticipantStats
-		if err := rows.Scan(&p.PlayerID, &p.TeamID, &p.IsStarting, &p.Goals, &p.Assists, &p.YellowCards, &p.RedCards); err != nil {
+		if err := rows.Scan(&p.PlayerID, &p.TeamID, &p.IsStarting, &p.Goals, &p.Passes, &p.YellowCards, &p.RedCards); err != nil {
 			return nil, err
 		}
 		participants = append(participants, p)
