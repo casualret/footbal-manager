@@ -124,7 +124,7 @@ function PlayerCard() {
             "https://via.placeholder.com/400x200?text=ФОТО+ИГРОКА"
           }
           alt={player.full_name}
-          className="w-full h-48 object-cover rounded-md mb-4 border"
+          className="w-full max-h-96 object-contain rounded-md mb-4 border"
         />
         <h1 className="text-2xl font-bold text-blue-800 mb-1">
           {player.full_name}
