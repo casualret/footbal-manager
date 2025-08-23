@@ -9,6 +9,9 @@ import {
 
 const API_URL = "http://localhost:8080";
 
+const getImageUrl = (url) =>
+  url ? (url.startsWith("http") ? url : `${API_URL}${url}`) : null;
+
 function PlayerList() {
   const [players, setPlayers] = useState([]);
   const [teamMap, setTeamMap] = useState({});
@@ -53,7 +56,7 @@ function PlayerList() {
                   <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
                     <img
                       src={
-                        p.photo_url ||
+                        getImageUrl(p.photo_url) ||
                         "https://via.placeholder.com/80x80?text=?"
                       }
                       alt={p.full_name}
@@ -117,7 +120,7 @@ function PlayerCard() {
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
         <img
           src={
-            player.photo_url ||
+            getImageUrl(player.photo_url) ||
             "https://via.placeholder.com/400x200?text=ФОТО+ИГРОКА"
           }
           alt={player.full_name}
@@ -194,7 +197,8 @@ function TeamList() {
                 <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
                   <img
                     src={
-                      t.logo_url || "https://via.placeholder.com/80x80?text=?"
+                      getImageUrl(t.logo_url) ||
+                      "https://via.placeholder.com/80x80?text=?"
                     }
                     alt={t.name}
                     className="object-cover w-full h-full"
@@ -229,7 +233,7 @@ function TeamCard() {
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
         <img
           src={
-            team.logo_url ||
+            getImageUrl(team.logo_url) ||
             "https://via.placeholder.com/400x200?text=ЛОГО+КОМАНДЫ"
           }
           alt={team.name}
@@ -245,7 +249,7 @@ function TeamCard() {
                   <div className="border-4 border-blue-300 rounded-full overflow-hidden w-20 h-20">
                     <img
                       src={
-                        p.photo_url ||
+                        getImageUrl(p.photo_url) ||
                         "https://via.placeholder.com/80x80?text=?"
                       }
                       alt={p.full_name}
