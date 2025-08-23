@@ -35,7 +35,7 @@ func (r *repository) CreateTeam(t NewTeam) (int, error) {
 }
 
 func (r *repository) GetTeams() ([]TeamCard, error) {
-	query := `SELECT id, name, logo_url FROM teams;`
+	query := `SELECT id, name, COALESCE(logo_url, '') AS logo_url FROM teams;`
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (r *repository) GetTeams() ([]TeamCard, error) {
 }
 
 func (r *repository) GetTeamByID(id int) (*TeamCard, error) {
-	query := `SELECT id, name, logo_url FROM teams WHERE id = $1;`
+	query := `SELECT id, name, COALESCE(logo_url, '') AS logo_url WHERE id = $1;`
 	var t TeamCard
 	if err := r.db.QueryRow(query, id).Scan(&t.ID, &t.Name, &t.LogoURL); err != nil {
 		return nil, err
