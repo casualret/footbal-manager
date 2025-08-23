@@ -12,6 +12,7 @@ type Repository interface {
 	GetPlayersByTeamID(teamID int) ([]player.PlayerShort, error)
 	CreateTeam(t NewTeam) (int, error)
 	AssignTeamToLeagueSeason(tls TeamLeagueSeason) (int, error)
+	UpdateLogoURL(id int, url string) error
 }
 
 type repository struct {
@@ -97,4 +98,9 @@ func (r *repository) AssignTeamToLeagueSeason(tls TeamLeagueSeason) (int, error)
 		return 0, err
 	}
 	return id, nil
+}
+
+func (r *repository) UpdateLogoURL(id int, url string) error {
+	_, err := r.db.Exec("UPDATE teams SET logo_url = $1 WHERE id = $2", url, id)
+	return err
 }
