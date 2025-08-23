@@ -17,20 +17,15 @@ func NewHandler(u Usecase) *Handler {
 
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/players", h.getPlayers)
-	r.GET("/players/:id", h.getPlayerCard)
+	r.GET("/players/:uid", h.getPlayerCard)
 	r.POST("/players", h.createPlayer)
 	r.POST("/player-team", h.addPlayerToTeam)
 }
 
 func (h *Handler) getPlayerCard(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid player id"})
-		return
-	}
+	uid := c.Param("uid")
 
-	playerCard, err := h.uc.GetPlayerCardByID(id)
+	playerCard, err := h.uc.GetPlayerCardByUID(uid)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "player not found"})
 		return
@@ -45,12 +40,12 @@ func (h *Handler) createPlayer(c *gin.Context) {
 		return
 	}
 
-	id, err := h.uc.CreatePlayer(req)
+	uid, err := h.uc.CreatePlayer(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"id": id})
+	c.JSON(http.StatusCreated, gin.H{"uid": uid})
 }
 
 func (h *Handler) addPlayerToTeam(c *gin.Context) {
