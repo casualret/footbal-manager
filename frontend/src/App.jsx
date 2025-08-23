@@ -372,6 +372,13 @@ function MatchCard() {
 
   if (!match) return <div className="p-6">Загрузка...</div>;
 
+  const homeParticipants = match.participants.filter(
+    (p) => p.team_id === match.home_team_id
+  );
+  const awayParticipants = match.participants.filter(
+    (p) => p.team_id === match.away_team_id
+  );
+
   return (
     <div className="max-w-3xl mx-auto p-6">
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
@@ -396,44 +403,76 @@ function MatchCard() {
           <div className="text-gray-600">{match.date}</div>
         </div>
 
-        <table className="w-full text-sm text-left">
-          <thead>
-            <tr className="border-b">
-              <th className="py-2">Игрок</th>
-              <th className="py-2">Команда</th>
-              <th className="py-2">Голы</th>
-              <th className="py-2">Пасы</th>
-              <th className="py-2">ЖК</th>
-              <th className="py-2">КК</th>
-            </tr>
-          </thead>
-          <tbody>
-            {match.participants.map((p) => (
-              <tr key={p.player_id} className="border-b">
-                <td className="py-2">
-                  <Link
-                    to={`/players/${playerMap[p.player_id]?.uid || ""}`}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {playerMap[p.player_id]?.name || p.player_id}
-                  </Link>
-                </td>
-                <td className="py-2">
-                  <Link
-                    to={`/teams/${p.team_id}`}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {teamMap[p.team_id] || p.team_id}
-                  </Link>
-                </td>
-                <td className="py-2">{p.goals}</td>
-                <td className="py-2">{p.passes}</td>
-                <td className="py-2">{p.yellow_cards}</td>
-                <td className="py-2">{p.red_cards}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="flex gap-6">
+          <div className="w-1/2">
+            <h3 className="text-center font-semibold mb-2">
+              {teamMap[match.home_team_id] || match.home_team_id}
+            </h3>
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-2">Игрок</th>
+                  <th className="py-2">Голы</th>
+                  <th className="py-2">Пасы</th>
+                  <th className="py-2">ЖК</th>
+                  <th className="py-2">КК</th>
+                </tr>
+              </thead>
+              <tbody>
+                {homeParticipants.map((p) => (
+                  <tr key={p.player_id} className="border-b">
+                    <td className="py-2">
+                      <Link
+                        to={`/players/${playerMap[p.player_id]?.uid || ""}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {playerMap[p.player_id]?.name || p.player_id}
+                      </Link>
+                    </td>
+                    <td className="py-2">{p.goals}</td>
+                    <td className="py-2">{p.passes}</td>
+                    <td className="py-2">{p.yellow_cards}</td>
+                    <td className="py-2">{p.red_cards}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="w-1/2">
+            <h3 className="text-center font-semibold mb-2">
+              {teamMap[match.away_team_id] || match.away_team_id}
+            </h3>
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-2">Игрок</th>
+                  <th className="py-2">Голы</th>
+                  <th className="py-2">Пасы</th>
+                  <th className="py-2">ЖК</th>
+                  <th className="py-2">КК</th>
+                </tr>
+              </thead>
+              <tbody>
+                {awayParticipants.map((p) => (
+                  <tr key={p.player_id} className="border-b">
+                    <td className="py-2">
+                      <Link
+                        to={`/players/${playerMap[p.player_id]?.uid || ""}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {playerMap[p.player_id]?.name || p.player_id}
+                      </Link>
+                    </td>
+                    <td className="py-2">{p.goals}</td>
+                    <td className="py-2">{p.passes}</td>
+                    <td className="py-2">{p.yellow_cards}</td>
+                    <td className="py-2">{p.red_cards}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <Link
           to="/matches"
